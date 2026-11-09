@@ -9,7 +9,7 @@ LICENSE file in the root directory of this source tree.
 module
 
 public import MathlibExt.GraphTheory.PartialListColoring
-import Mathlib
+import Mathlib.Tactic.FinCases
 
 @[expose] public section
 
@@ -28,7 +28,7 @@ example : Noel.IsListAssignment Noel.L 2 := by
   unfold Noel.IsListAssignment; decide
 
 /-- The 2-list assignment is not trivially fully colorable: nine vertices can be coloured, and
-the colouring is a proper list colouring in the sense. -/
+the colouring is a proper list colouring in the sense of `IsListColoring`. -/
 example : ∃ (S : Finset Noel.V) (f : Noel.V → ℕ),
     IsListColoring Noel.G Noel.L f S ∧ S.card = 9 := by
   refine ⟨Noel.S9, Noel.c9, ?_, by decide⟩

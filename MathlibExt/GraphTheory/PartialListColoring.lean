@@ -8,7 +8,13 @@ LICENSE file in the root directory of this source tree.
 
 module
 
-public import Mathlib
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.Algebra.Order.Star.Rat
+public import Mathlib.Tactic.CancelDenoms.Core
+public import Mathlib.Tactic.IntervalCases
+public import Mathlib.Tactic.Linarith.Lemmas
+public import Mathlib.Tactic.Ring.Basic
 public import MathlibExt.Combinatorics.SimpleGraph.ListColoring
 
 @[expose] public section
@@ -472,7 +478,7 @@ theorem nine_bound (S : Finset V) (c : V → ℕ) (h : IsPartialListColoring G L
               intro i _
               by_cases hi : i = (0 : Fin 4)
               · subst hi; simpa using hspec
-              · simp [hi]; exact htri i
+              · simpa [hi] using htri i
           _ = 7 := by decide
       omega
     · -- terminal colours 0 and 3: triangle `T 1`
@@ -488,7 +494,7 @@ theorem nine_bound (S : Finset V) (c : V → ℕ) (h : IsPartialListColoring G L
               intro i _
               by_cases hi : i = (1 : Fin 4)
               · subst hi; simpa using hspec
-              · simp [hi]; exact htri i
+              · simpa [hi] using htri i
           _ = 7 := by decide
       omega
     · -- terminal colours 1 and 2: triangle `T 2`
@@ -504,7 +510,7 @@ theorem nine_bound (S : Finset V) (c : V → ℕ) (h : IsPartialListColoring G L
               intro i _
               by_cases hi : i = (2 : Fin 4)
               · subst hi; simpa using hspec
-              · simp [hi]; exact htri i
+              · simpa [hi] using htri i
           _ = 7 := by decide
       omega
     · -- terminal colours 1 and 3: triangle `T 3`
@@ -520,7 +526,7 @@ theorem nine_bound (S : Finset V) (c : V → ℕ) (h : IsPartialListColoring G L
               intro i _
               by_cases hi : i = (3 : Fin 4)
               · subst hi; simpa using hspec
-              · simp [hi]; exact htri i
+              · simpa [hi] using htri i
           _ = 7 := by decide
       omega
   · have hU1 : (S ∩ terminals).card ≤ 1 := by
@@ -753,13 +759,14 @@ end
 
 end Noel
 
-/-- A graph that is choosable in the `ℕ`-list sense is list-colorable in the
-sense over an arbitrary color type: the finite union of the lists is injectively encoded in `ℕ`. -/
-lemma isListColorable_of_choosable {W : Type*} [Fintype W] [DecidableEq W]
+/-- A graph that is choosable in the `ℕ`-list sense is list-colorable over
+an arbitrary color type: the finite union of the lists is injectively encoded in `ℕ`. -/
+lemma isListColorable_of_choosable {W : Type*} [Finite W]
     {H : SimpleGraph W} {q : ℕ} (h : Noel.Choosable H q) :
     H.IsListColorable q := by
   intro C _ lists hlists
   classical
+  haveI : Fintype W := Fintype.ofFinite W
   let U : Finset C := Finset.univ.biUnion lists
   let e : {c // c ∈ U} ≃ Fin (Fintype.card U) := Fintype.equivFin _
   let ψ : C → ℕ := fun c => if hc : c ∈ U then (e ⟨c, hc⟩).val else 0
@@ -800,8 +807,8 @@ lemma choosable_of_isListColorable {W : Type*} {H : SimpleGraph W} {q : ℕ}
   obtain ⟨color, hmem⟩ := h ℕ L (fun v => by rw [hL v])
   exact ⟨color, hmem, fun u v huv => color.valid huv⟩
 
-/-- Noel's explicit 14-vertex graph has choice number `3` in the
-sense, i.e. it satisfies the hypothesis of `conjecture`. -/
+/-- Noel's explicit 14-vertex graph has choice number `3`, i.e. it
+satisfies the hypothesis of `conjecture`. -/
 theorem noel_isChoiceNumber : Noel.G.IsChoiceNumber 3 := by
   refine ⟨isListColorable_of_choosable Noel.choosable_three, ?_⟩
   intro r hr hlist
