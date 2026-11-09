@@ -14,7 +14,7 @@ public import Mathlib.Algebra.Order.Star.Rat
 public import Mathlib.Tactic.CancelDenoms.Core
 public import Mathlib.Tactic.DeriveFintype
 public import Mathlib.Tactic.IntervalCases
-public import Mathlib.Tactic.Linarith.Lemmas
+public import Mathlib.Tactic.Linarith
 public import Mathlib.Tactic.Ring.Basic
 public import MathlibExt.Combinatorics.SimpleGraph.ListColoring
 
