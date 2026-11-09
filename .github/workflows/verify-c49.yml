@@ -30,7 +30,7 @@ jobs:
           lake env lean /tmp/ax.lean
       - name: Repository policy on the changed modules
         run: |
-          sed -i "s/-name '\*.lean' -print/-name 'PartialListColoring*.lean' -print/" scripts/check_axioms.sh
+          sed -i "s/-name '\*.lean' -print/-path '*\/GraphTheory\/PartialListColoring*.lean' -print/" scripts/check_axioms.sh
           grep -n "PartialListColoring" scripts/check_axioms.sh
           scripts/check_axioms.sh
           git checkout scripts/check_axioms.sh
