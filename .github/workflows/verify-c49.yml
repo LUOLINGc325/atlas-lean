@@ -1,0 +1,39 @@
+name: verify-c49
+on:
+  push:
+    branches: [verify-c49]
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swap
+        run: |
+          sudo fallocate -l 16G /mnt/lean-swap && sudo chmod 600 /mnt/lean-swap
+          sudo mkswap /mnt/lean-swap && sudo swapon /mnt/lean-swap
+      - name: Preflight
+        continue-on-error: true
+        run: scripts/check.sh preflight 2>&1 | tail -40
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o elan-init.sh
+          sh elan-init.sh -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: lake exe cache get
+      - name: Build
+        run: |
+          set -o pipefail
+          lake build MathlibExt.GraphTheory.PartialListColoring MathlibExtTest.GraphTheory.PartialListColoring WantedExt.GraphTheory.PartialListColoringWanted 2>&1 | tee build.log
+      - name: Axioms
+        run: |
+          printf 'import MathlibExt.GraphTheory.PartialListColoring\n#print axioms MathlibExt.GraphTheory.PartialListColoringWanted.conjecture_refuted\n' > /tmp/ax.lean
+          lake env lean /tmp/ax.lean
+      - name: Min imports
+        continue-on-error: true
+        run: |
+          for f in MathlibExt MathlibExtTest; do
+            cp $f/GraphTheory/PartialListColoring.lean /tmp/m_$f.lean
+            echo '#min_imports' >> /tmp/m_$f.lean
+            echo "== $f"; lake env lean /tmp/m_$f.lean 2>&1 | tail -60
+          done
