@@ -13,8 +13,7 @@ jobs:
           sudo fallocate -l 16G /mnt/lean-swap && sudo chmod 600 /mnt/lean-swap
           sudo mkswap /mnt/lean-swap && sudo swapon /mnt/lean-swap
       - name: Preflight
-        continue-on-error: true
-        run: scripts/check.sh preflight 2>&1 | tail -40
+        run: scripts/check.sh preflight
       - name: Install elan
         run: |
           curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o elan-init.sh
@@ -29,6 +28,12 @@ jobs:
         run: |
           printf 'import MathlibExt.GraphTheory.PartialListColoring\n#print axioms MathlibExt.GraphTheory.PartialListColoringWanted.conjecture_refuted\n' > /tmp/ax.lean
           lake env lean /tmp/ax.lean
+      - name: Repository policy on the changed modules
+        run: |
+          sed -i "s/-name '\*.lean' -print/-name 'PartialListColoring*.lean' -print/" scripts/check_axioms.sh
+          grep -n "PartialListColoring" scripts/check_axioms.sh
+          scripts/check_axioms.sh
+          git checkout scripts/check_axioms.sh
       - name: Min imports
         continue-on-error: true
         run: |
