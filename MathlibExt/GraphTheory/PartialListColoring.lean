@@ -12,6 +12,7 @@ public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Mathlib.Algebra.Order.Ring.Star
 public import Mathlib.Algebra.Order.Star.Rat
 public import Mathlib.Tactic.CancelDenoms.Core
+public import Mathlib.Tactic.DeriveFintype
 public import Mathlib.Tactic.IntervalCases
 public import Mathlib.Tactic.Linarith.Lemmas
 public import Mathlib.Tactic.Ring.Basic
@@ -766,7 +767,7 @@ lemma isListColorable_of_choosable {W : Type*} [Finite W]
     H.IsListColorable q := by
   intro C _ lists hlists
   classical
-  haveI : Fintype W := Fintype.ofFinite W
+  have : Fintype W := Fintype.ofFinite W
   let U : Finset C := Finset.univ.biUnion lists
   let e : {c // c ∈ U} ≃ Fin (Fintype.card U) := Fintype.equivFin _
   let ψ : C → ℕ := fun c => if hc : c ∈ U then (e ⟨c, hc⟩).val else 0
